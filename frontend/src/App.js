@@ -6,18 +6,41 @@ function App() {
   const [successMessage, setSuccessMessage] = useState() 
   const [failureMessage, setFailureMessage] = useState() 
 
-  useEffect(() => {
-    const getId = async () => {
-      try {
-        const resp = await fetch(API_URL)
-        setSuccessMessage((await resp.json()).id)
+ useEffect(() => {
+
+  const getId = async () => {
+
+    try {
+
+      const resp = await fetch(API_URL)
+
+      console.log('resp:', resp)
+
+      if (!resp.ok) {
+
+        throw new Error(`HTTP error ${resp.status}`)
+
       }
-      catch(e) {
-        setFailureMessage(e.message)
-      }
+
+      const data = await resp.json()
+
+      console.log('data:', data)
+
+      setSuccessMessage(data.id)
+
+    } catch (e) {
+
+      console.error('Fetch failed:', e)
+
+      setFailureMessage(String(e))
+
     }
-    getId()
-  })
+
+  }
+
+  getId()
+
+}, [])
 
   return (
     <div className="App">
