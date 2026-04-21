@@ -3,50 +3,39 @@ import './App.css';
 import API_URL from './config'
 
 function App() {
-  const [successMessage, setSuccessMessage] = useState() 
-  const [failureMessage, setFailureMessage] = useState() 
+  const [successMessage, setSuccessMessage] = useState()
+  const [failureMessage, setFailureMessage] = useState()
 
- useEffect(() => {
+  useEffect(() => {
+    const getId = async () => {
+      try {
+        const resp = await fetch(API_URL)
 
-  const getId = async () => {
+        console.log('resp:', resp)
 
-    try {
+        if (!resp.ok) {
+          throw new Error(`HTTP error ${resp.status}`)
+        }
 
-      const resp = await fetch(API_URL)
+        const data = await resp.json()
 
-      console.log('resp:', resp)
+        console.log('data:', data)
 
-      if (!resp.ok) {
-
-        throw new Error(`HTTP error ${resp.status}`)
-
+        setSuccessMessage(data.id)
+      } catch (e) {
+        console.error('Fetch failed:', e)
+        setFailureMessage(String(e))
       }
-
-      const data = await resp.json()
-
-      console.log('data:', data)
-
-      setSuccessMessage(data.id)
-
-    } catch (e) {
-
-      console.error('Fetch failed:', e)
-
-      setFailureMessage(String(e))
-
     }
 
-  }
-
-  getId()
-
-}, [])
+    getId()
+  }, [])
 
   return (
     <div className="App">
       {!failureMessage && !successMessage ? 'Fetching...' : null}
       {failureMessage ? failureMessage : null}
-      {successMessage ? successMessage : null}
+      {successMessage ? `Success: ${successMessage}` : null}
     </div>
   );
 }
