@@ -28,6 +28,12 @@ variable "private_subnet_cidrs" {
   default = ["10.0.11.0/24", "10.0.12.0/24"]
 }
 
+# IP range allowed for SSH and Jenkins access
+variable "my_ip_cidr" {
+  type        = string
+  description = "CIDR block allowed to access Jenkins server"
+}
+
 # ECR image for frontend
 variable "frontend_ecr_image" {
   type = string

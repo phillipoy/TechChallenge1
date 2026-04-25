@@ -1,237 +1,240 @@
-# DevOps Code Challenge 1
+# Tech Challenge 1  
+## Full DevOps Deployment with Jenkins, Terraform, ECS Fargate, and EC2
 
-## Overview
+## Project Overview
 
-This project demonstrates a full DevOps workflow for deploying a containerized full-stack application on AWS using Terraform, Docker, ECS Fargate, and Jenkins.
+This project demonstrates a complete end to end DevOps deployment using AWS cloud services, Infrastructure as Code, containerization, and CI/CD automation.
 
-The system includes:
-- React frontend
-- Node.js backend
-- AWS ECS (Fargate)
-- AWS ECR
-- Application Load Balancer (ALB)
-- Jenkins CI/CD pipeline
-- Terraform (Infrastructure as Code)
+The application consists of a frontend and backend service containerized with Docker and deployed to Amazon ECS using AWS Fargate. Infrastructure was provisioned with Terraform, while Jenkins was hosted on a dedicated EC2 server to automate build and deployment pipelines.
 
 ---
 
-## Architecture
+## Core Technologies Used
 
-User → ALB → Frontend (ECS) → Backend (ECS)
-
-- Frontend handles UI
-- Backend returns a GUID
-- ALB routes /api traffic to backend
-
----
-
-## Local Setup
-
-### Prerequisites
-
-- Node.js
-- npm
-- Git
+- AWS EC2
+- Amazon ECS
+- AWS Fargate
+- Amazon ECR
+- Application Load Balancer
+- Terraform
+- Jenkins
 - Docker
+- GitHub
+- CloudWatch
+- IAM
+- Ubuntu Linux
 
 ---
 
-### Run Locally (Without Docker)
+## Solution Architecture
 
-Backend:
-
-cd backend
-npm install
-npm start
-
-Backend runs at:
-http://localhost:8080/api
-
-Frontend:
-
-cd frontend
-npm install
-npm start
-
-Frontend runs at:
-http://localhost:3000
+GitHub Repository  
+↓  
+Jenkins Pipeline on EC2  
+↓  
+Build Frontend and Backend Docker Images  
+↓  
+Push Images to Amazon ECR  
+↓  
+Update ECS Task Definitions  
+↓  
+Deploy Containers to ECS Fargate  
+↓  
+Serve Traffic Through Application Load Balancer
 
 ---
 
-## Docker Setup
+## Infrastructure Provisioned with Terraform
 
-### Run with Docker Compose
+Terraform was used to deploy and manage all cloud infrastructure.
 
+### Networking
+
+- Custom VPC
+- Public Subnets
+- Private Subnets
+- Internet Gateway
+- NAT Gateway
+- Route Tables
+
+### Security
+
+- Security Groups for ALB
+- Security Groups for ECS Tasks
+- Security Group for Jenkins EC2 Server
+
+### Compute
+
+- ECS Cluster
+- ECS Services
+- ECS Task Definitions
+- AWS Fargate Containers
+- Jenkins EC2 Server
+
+### Load Balancing
+
+- Application Load Balancer
+- Target Groups
+- Listener Rules
+
+### Scaling
+
+- ECS Auto Scaling Policies
+
+### Monitoring
+
+- CloudWatch Log Groups
+
+### IAM Roles
+
+- ECS Task Execution Role
+- Jenkins EC2 IAM Role
+
+Attached Jenkins permissions:
+
+- AmazonECS_FullAccess
+- AmazonEC2ContainerRegistryFullAccess
+
+---
+
+## Jenkins Server
+
+A dedicated Jenkins server was deployed using Terraform.
+
+### Server Specifications
+
+- Name: Jenkins-Server-Tech-1
+- Operating System: Ubuntu
+- Instance Type: m7i-flex.large
+- Storage: 30 GB
+- Public IP Enabled
+
+### Jenkins Access
+
+```text
+http://EC2_PUBLIC_IP:8080
+```
+
+---
+
+## CI/CD Pipeline Workflow
+
+Jenkins automates the full deployment lifecycle.
+
+### Pipeline Stages
+
+1. Pull latest source code from GitHub
+2. Build frontend Docker image
+3. Build backend Docker image
+4. Authenticate to Amazon ECR
+5. Push images to ECR
+6. Register updated ECS task definition
+7. Trigger ECS service deployment
+8. Roll out new containers
+
+---
+
+## Docker Usage
+
+### Local Development
+
+```bash
 docker compose up --build
+```
 
-This will:
-- Build frontend and backend images
-- Start both services
-- Connect them together automatically
+### Containers Built
 
----
-
-### Access Locally
-
-Frontend:
-http://localhost:3000
-
-Backend:
-http://localhost:8080/api
+- Frontend
+- Backend
 
 ---
 
-### Important Note (Local vs AWS)
+## Terraform File Structure
 
-When running locally, the frontend communicates with the backend using localhost-based URLs.
-
-When deployed to AWS, the frontend must call the backend through the Application Load Balancer using:
-
-http://<ALB-DNS>/api
-
-In the deployed environment, localhost does not refer to the ECS backend.
-
-The frontend and backend config.js files may need to be updated when switching between local development and AWS deployment. Local development can use localhost, while the deployed version should use the ALB DNS name so requests reach the backend correctly.
-
----
-
-## Terraform Deployment Guide
-
-### Prerequisites
-
-- AWS CLI configured (aws configure)
-- Terraform installed
+| File | Purpose |
+|------|---------|
+| provider.tf | AWS provider configuration |
+| variables.tf | Terraform input variables |
+| terraform.tfvars | Environment values |
+| network.tf | VPC, subnets, routing |
+| security.tf | Security groups |
+| iam.tf | IAM roles and permissions |
+| alb.tf | Load balancer resources |
+| ecs.tf | ECS cluster, services, tasks |
+| autoscaling.tf | ECS scaling policies |
+| logs.tf | CloudWatch logging |
+| ec2.tf | Jenkins server deployment |
+| outputs.tf | Terraform outputs |
 
 ---
 
-### Deploy Infrastructure
+## Deployment Commands
 
+### Terraform Deployment
+
+```bash
 cd terraform
 terraform init
+terraform fmt
+terraform validate
+terraform plan
 terraform apply
+```
 
-This creates:
-- VPC
-- Public and private subnets
-- ALB
-- ECS Cluster (Fargate)
-- ECS Services (frontend + backend)
-- ECR repositories
-- Security groups
-- Autoscaling configuration
+### Jenkins Deployment
 
----
-
-## Jenkins Setup and Pipeline
-
-### Jenkins Server Setup (EC2)
-
-Jenkins is hosted on an EC2 instance.
-
-### Install Dependencies
-
-sudo apt update
-sudo apt install docker.io -y
-sudo apt install awscli -y
-sudo apt install jq -y
-
-### Jenkins Configuration
-
-1. Create a Pipeline Job
-2. Select "Pipeline from SCM"
-3. Set:
-   - GitHub repository URL
-   - Branch: main
-   - Script path: Jenkinsfile
-
-### Pipeline Workflow
-
-1. Checkout code from GitHub
-2. Build Docker images
-3. Login to AWS ECR
-4. Push images to ECR
-5. Register ECS task definitions
-6. Update ECS services
+1. Access Jenkins in browser
+2. Configure GitHub credentials
+3. Configure pipeline job
+4. Connect Jenkinsfile from repository
+5. Run build pipeline
 
 ---
 
-## Jenkins Infrastructure Details
+## Load Testing
 
-- EC2 Instance Type: m7i-flex.large
-- OS: Ubuntu
-- Security Group:
-  - Port 22 (SSH)
-  - Port 8080 (Jenkins UI)
-  - Outbound: Allow all
-- IAM Role Permissions:
-  - AmazonEC2ContainerRegistryPowerUser
-  - AmazonECS_FullAccess
+Used Siege to simulate production traffic and validate scaling behavior.
 
----
+```bash
+siege -c 250 -t 2M http://YOUR-ALB-DNS/
+```
 
-## Load Balancer Routing
+Result:
 
-- / → Frontend
-- /api and /api/* → Backend
+- Frontend service auto scaled successfully
+- Application remained available under load
 
 ---
 
-## Fargate Scaling and Load Testing
+## Skills Demonstrated
 
-### Autoscaling Configuration
-
-- Minimum tasks: 1
-- Maximum tasks: 4
-- Target CPU: 50%
-
-### Load Testing with Siege
-
-Frontend test:
-
-siege -c 250 -t 2M http://<ALB-DNS>/
-
-Backend test:
-
-siege -c 250 -t 2M http://<ALB-DNS>/api
-
-### Results
-
-- Frontend scaled from 1 → 2 tasks
-- Backend remained at 1 task due to lightweight processing
-- Autoscaling successfully validated
+- AWS Cloud Infrastructure
+- Terraform
+- Jenkins CI/CD
+- Docker
+- ECS Fargate
+- ECR
+- IAM
+- Linux Administration
+- Networking
+- Auto Scaling
+- Load Balancing
+- DevOps Automation
 
 ---
 
-## Application Output
+## Future Enhancements
 
-SUCCESS <GUID>
-
-Example:
-
-SUCCESS 958f3127-aae6-42fe-a9ac-ee9816bcc60c
-
----
-
-## Key Learnings
-
-- Built production-style cloud architecture using ECS Fargate
-- Implemented CI/CD pipeline with Jenkins
-- Used Terraform for Infrastructure as Code
-- Configured ALB path-based routing
-- Validated autoscaling using load testing
-
----
-
-## Future Improvements
-
-- Add HTTPS with AWS ACM
-- Add GitHub webhooks for Jenkins automation
-- Use environment variables instead of hardcoding API URLs
-- Add monitoring dashboards with CloudWatch
-- Add custom domain using Route 53
+- HTTPS with ACM certificate
+- Route53 custom domain
+- GitHub Actions GitOps branch
+- Blue Green deployments
+- CloudWatch alarms
+- Private Jenkins subnet
+- AWS WAF integration
 
 ---
 
 ## Author
 
-Phillip Oyediran 
+Phillip Oyediran
