@@ -1,11 +1,22 @@
-# Tech Challenge 1  
-## Full DevOps Deployment with Jenkins, Terraform, ECS Fargate, and EC2
+# Tech Challenge 1 GitOps Branch  
+## Full DevOps Deployment with GitHub Actions, Terraform, ECS Fargate, and EC2
 
 ## Project Overview
 
-This project demonstrates a complete end to end DevOps deployment using AWS cloud services, Infrastructure as Code, containerization, and CI/CD automation.
+This branch demonstrates the same full application deployment as the main branch, but uses GitHub Actions for CI/CD instead of Jenkins.
 
-The application consists of a frontend and backend service containerized with Docker and deployed to Amazon ECS using AWS Fargate. Infrastructure was provisioned with Terraform, while Jenkins was hosted on a dedicated EC2 server to automate build and deployment pipelines.
+The application includes a frontend and backend service containerized with Docker and deployed to Amazon ECS using AWS Fargate. Infrastructure is provisioned with Terraform, while deployments are automated through GitHub Actions using a GitOps workflow.
+
+This branch exists to show an alternative modern CI/CD method while reusing the same AWS infrastructure.
+
+---
+
+## Branch Purpose
+
+- `main` branch = Jenkins CI/CD pipeline running on EC2  
+- `gitops` branch = GitHub Actions CI/CD pipeline
+
+Both branches deploy the same project, but use different automation tools.
 
 ---
 
@@ -17,7 +28,7 @@ The application consists of a frontend and backend service containerized with Do
 - Amazon ECR
 - Application Load Balancer
 - Terraform
-- Jenkins
+- GitHub Actions
 - Docker
 - GitHub
 - CloudWatch
@@ -30,13 +41,13 @@ The application consists of a frontend and backend service containerized with Do
 
 GitHub Repository  
 ↓  
-Jenkins Pipeline on EC2  
+GitHub Actions Workflow  
 ↓  
 Build Frontend and Backend Docker Images  
 ↓  
 Push Images to Amazon ECR  
 ↓  
-Update ECS Task Definitions  
+Update ECS Services  
 ↓  
 Deploy Containers to ECS Fargate  
 ↓  
@@ -46,7 +57,7 @@ Serve Traffic Through Application Load Balancer
 
 ## Infrastructure Provisioned with Terraform
 
-Terraform was used to deploy and manage all cloud infrastructure.
+Terraform is still used to deploy and manage all AWS resources.
 
 ### Networking
 
@@ -89,63 +100,56 @@ Terraform was used to deploy and manage all cloud infrastructure.
 
 - ECS Task Execution Role
 - Jenkins EC2 IAM Role
-
-Attached Jenkins permissions:
-
-- AmazonECS_FullAccess
-- AmazonEC2ContainerRegistryFullAccess
+- GitHub Actions IAM User / Credentials
 
 ---
 
-## Jenkins Server
+## GitHub Actions CI/CD Workflow
 
-A dedicated Jenkins server was deployed using Terraform.
+When code is pushed to the `gitops` branch, GitHub Actions automatically performs:
 
-### Server Specifications
+1. Pull latest source code
+2. Authenticate to AWS using GitHub Secrets
+3. Build frontend Docker image
+4. Build backend Docker image
+5. Push images to Amazon ECR
+6. Trigger ECS frontend deployment
+7. Trigger ECS backend deployment
+8. Roll out updated containers
 
-- Name: Jenkins-Server-Tech-1
-- Operating System: Ubuntu
-- Instance Type: m7i-flex.large
-- Storage: 30 GB
-- Public IP Enabled
+---
 
-### Jenkins Access
+## Why GitHub Secrets Were Needed
+
+- GitHub Actions runs outside of AWS, so it needs credentials to access ECS and ECR  
+- GitHub Secrets securely store AWS credentials without exposing them in code
+
+---
+
+## GitHub Actions Workflow File
 
 ```text
-http://EC2_PUBLIC_IP:8080
+.github/workflows/ecs-gitops.yml
 ```
+
+This file serves the same purpose as a Jenkinsfile, but for GitHub Actions.
 
 ---
 
-## CI/CD Pipeline Workflow
+## ECS Resources Used
 
-Jenkins automates the full deployment lifecycle.
+### Cluster
 
-### Pipeline Stages
-
-1. Pull latest source code from GitHub
-2. Build frontend Docker image
-3. Build backend Docker image
-4. Authenticate to Amazon ECR
-5. Push images to ECR
-6. Register updated ECS task definition
-7. Trigger ECS service deployment
-8. Roll out new containers
-
----
-
-## Docker Usage
-
-### Local Development
-
-```bash
-docker compose up --build
+```text
+techchallenge1-cluster
 ```
 
-### Containers Built
+### Services
 
-- Frontend
-- Backend
+```text
+techchallenge1-frontend-svc
+techchallenge1-backend-svc
+```
 
 ---
 
@@ -168,9 +172,9 @@ docker compose up --build
 
 ---
 
-## Deployment Commands
+## How to Run This Project
 
-### Terraform Deployment
+### Terraform Infrastructure
 
 ```bash
 cd terraform
@@ -181,19 +185,30 @@ terraform plan
 terraform apply
 ```
 
-### Jenkins Deployment
+### GitOps Deployment
 
-1. Access Jenkins in browser
-2. Configure GitHub credentials
-3. Configure pipeline job
-4. Connect Jenkinsfile from repository
-5. Run build pipeline
+```bash
+git checkout gitops
+git add .
+git commit -m "GitOps update"
+git push origin gitops
+```
+
+After pushing to the `gitops` branch, GitHub Actions automatically runs the deployment workflow.
+
+---
+
+## Local Docker Testing
+
+```bash
+docker compose up --build
+```
 
 ---
 
 ## Load Testing
 
-Used Siege to simulate production traffic and validate scaling behavior.
+Used Siege to simulate traffic and test scaling.
 
 ```bash
 siege -c 250 -t 2M http://YOUR-ALB-DNS/
@@ -208,30 +223,28 @@ Result:
 
 ## Skills Demonstrated
 
-- AWS Cloud Infrastructure
+- GitHub Actions
 - Terraform
-- Jenkins CI/CD
 - Docker
-- ECS Fargate
-- ECR
-- IAM
+- AWS ECS
+- AWS Fargate
+- Amazon ECR
+- CI/CD Automation
+- GitOps Workflows
+- IAM Security
 - Linux Administration
-- Networking
-- Auto Scaling
 - Load Balancing
-- DevOps Automation
+- Auto Scaling
 
 ---
 
-## Future Enhancements
+## Benefits of This Branch
 
-- HTTPS with ACM certificate
-- Route53 custom domain
-- GitHub Actions GitOps branch
-- Blue Green deployments
-- CloudWatch alarms
-- Private Jenkins subnet
-- AWS WAF integration
+- Native GitHub automation
+- No Jenkins dependency for deployments
+- CI/CD directly tied to source control
+- Modern GitOps workflow
+- Clean separation from Jenkins branch
 
 ---
 
