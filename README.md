@@ -3,9 +3,20 @@
 
 ## Project Overview
 
-This project demonstrates a complete end to end DevOps deployment using AWS cloud services, Infrastructure as Code, containerization, and CI/CD automation.
+This branch demonstrates a complete end to end DevOps deployment using Jenkins for CI/CD automation, Terraform for Infrastructure as Code, Docker for containerization, and Amazon ECS with Fargate for application hosting.
 
-The application consists of a frontend and backend service containerized with Docker and deployed to Amazon ECS using AWS Fargate. Infrastructure was provisioned with Terraform, while Jenkins was hosted on a dedicated EC2 server to automate build and deployment pipelines.
+The application consists of a frontend and backend service. Both services are containerized, pushed to Amazon ECR, and deployed through a Jenkins pipeline hosted on a dedicated EC2 server.
+
+This `main` branch is specifically focused on the Jenkins based CI/CD workflow.
+
+---
+
+## Branch Purpose
+
+- `main` branch = Jenkins CI/CD pipeline  
+- `gitops` branch = GitHub Actions CI/CD pipeline
+
+Both branches deploy the same project using different automation tools.
 
 ---
 
@@ -46,7 +57,7 @@ Serve Traffic Through Application Load Balancer
 
 ## Infrastructure Provisioned with Terraform
 
-Terraform was used to deploy and manage all cloud infrastructure.
+Terraform was used to deploy and manage all AWS resources.
 
 ### Networking
 
@@ -99,7 +110,7 @@ Attached Jenkins permissions:
 
 ## Jenkins Server
 
-A dedicated Jenkins server was deployed using Terraform.
+Terraform provisions a dedicated Jenkins server.
 
 ### Server Specifications
 
@@ -117,35 +128,47 @@ http://EC2_PUBLIC_IP:8080
 
 ---
 
-## CI/CD Pipeline Workflow
+## Jenkins CI/CD Workflow
 
-Jenkins automates the full deployment lifecycle.
-
-### Pipeline Stages
+When code is pushed to the `main` branch, Jenkins automatically performs:
 
 1. Pull latest source code from GitHub
 2. Build frontend Docker image
 3. Build backend Docker image
 4. Authenticate to Amazon ECR
 5. Push images to ECR
-6. Register updated ECS task definition
-7. Trigger ECS service deployment
-8. Roll out new containers
+6. Register updated ECS task definitions
+7. Trigger ECS deployments
+8. Roll out updated containers
+
+GitHub webhook integration was configured to automatically trigger builds after every push to the `main` branch.
 
 ---
 
-## Docker Usage
+## Main Jenkins Pipeline File
 
-### Local Development
-
-```bash
-docker compose up --build
+```text
+Jenkinsfile
 ```
 
-### Containers Built
+This file defines all Jenkins build and deployment stages.
 
-- Frontend
-- Backend
+---
+
+## ECS Resources Used
+
+### Cluster
+
+```text
+techchallenge1-cluster
+```
+
+### Services
+
+```text
+techchallenge1-frontend-svc
+techchallenge1-backend-svc
+```
 
 ---
 
@@ -168,9 +191,9 @@ docker compose up --build
 
 ---
 
-## Deployment Commands
+## How to Run This Project
 
-### Terraform Deployment
+### Terraform Infrastructure
 
 ```bash
 cd terraform
@@ -181,19 +204,30 @@ terraform plan
 terraform apply
 ```
 
-### Jenkins Deployment
+### Jenkins Deployment Workflow
 
-1. Access Jenkins in browser
-2. Configure GitHub credentials
-3. Configure pipeline job
-4. Connect Jenkinsfile from repository
-5. Run build pipeline
+```bash
+git checkout main
+git add .
+git commit -m "Update application"
+git push origin main
+```
+
+After pushing to `main`, Jenkins automatically starts the deployment pipeline.
+
+---
+
+## Local Docker Testing
+
+```bash
+docker compose up --build
+```
 
 ---
 
 ## Load Testing
 
-Used Siege to simulate production traffic and validate scaling behavior.
+Used Siege to simulate traffic and validate scaling behavior.
 
 ```bash
 siege -c 250 -t 2M http://YOUR-ALB-DNS/
@@ -208,30 +242,27 @@ Result:
 
 ## Skills Demonstrated
 
-- AWS Cloud Infrastructure
-- Terraform
 - Jenkins CI/CD
+- Terraform
 - Docker
-- ECS Fargate
-- ECR
+- AWS ECS
+- AWS Fargate
+- Amazon ECR
 - IAM
 - Linux Administration
-- Networking
-- Auto Scaling
 - Load Balancing
+- Auto Scaling
 - DevOps Automation
 
 ---
 
-## Future Enhancements
+## Benefits of This Branch
 
-- HTTPS with ACM certificate
-- Route53 custom domain
-- GitHub Actions GitOps branch
-- Blue Green deployments
-- CloudWatch alarms
-- Private Jenkins subnet
-- AWS WAF integration
+- Dedicated Jenkins automation server
+- Full CI/CD pipeline control
+- Real world Jenkins on EC2 deployment model
+- Automated GitHub webhook builds
+- Reproducible infrastructure with Terraform
 
 ---
 
