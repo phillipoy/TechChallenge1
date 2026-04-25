@@ -1,0 +1,66 @@
+name: GitOps ECS Deployment
+
+on:
+  push:
+    branches:
+      - gitops
+
+env:
+  AWS_REGION: us-east-1
+  AWS_ACCOUNT_ID: 113645088585
+
+  FRONTEND_ECR_REPOSITORY: frontend
+  BACKEND_ECR_REPOSITORY: backend
+
+  FRONTEND_IMAGE: 113645088585.dkr.ecr.us-east-1.amazonaws.com/frontend
+  BACKEND_IMAGE: 113645088585.dkr.ecr.us-east-1.amazonaws.com/backend
+
+jobs:
+  build-and-deploy:
+    name: Build and Deploy to ECS
+    runs-on: ubuntu-latest
+
+    steps:
+      # Pulls the code from the gitops branch
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Configures AWS access for GitHub Actions
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # Logs into Amazon ECR
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # Builds and pushes frontend image
+      - name: Build and push frontend image
+        run: |
+          docker build -t $FRONTEND_IMAGE:latest ./frontend
+          docker push $FRONTEND_IMAGE:latest
+
+      # Builds and pushes backend image
+      - name: Build and push backend image
+        run: |
+          docker build -t $BACKEND_IMAGE:latest ./backend
+          docker push $BACKEND_IMAGE:latest
+
+      # Forces ECS to pull the latest frontend image
+      - name: Deploy frontend service
+        run: |
+          aws ecs update-service \
+            --cluster techchallenge1-cluster \
+            --service techchallenge1-frontend-svc \
+            --force-new-deployment
+
+      # Forces ECS to pull the latest backend image
+      - name: Deploy backend service
+        run: |
+          aws ecs update-service \
+            --cluster techchallenge1-cluster \
+            --service techchallenge1-backend-svc \
+            --force-new-deployment
