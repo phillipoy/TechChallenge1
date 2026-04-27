@@ -1,0 +1,76 @@
+{
+    "taskDefinitionArn": "arn:aws:ecs:us-east-1:113645088585:task-definition/techchallenge1-backend:12",
+    "containerDefinitions": [
+        {
+            "name": "backend",
+            "image": "113645088585.dkr.ecr.us-east-1.amazonaws.com/backend:8",
+            "cpu": 0,
+            "portMappings": [
+                {
+                    "containerPort": 8080,
+                    "hostPort": 8080,
+                    "protocol": "tcp"
+                }
+            ],
+            "essential": true,
+            "environment": [],
+            "mountPoints": [],
+            "volumesFrom": [],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/techchallenge1/backend",
+                    "awslogs-region": "us-east-1",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            },
+            "systemControls": []
+        }
+    ],
+    "family": "techchallenge1-backend",
+    "taskRoleArn": "arn:aws:iam::113645088585:role/techchallenge1-ecs-task-role",
+    "executionRoleArn": "arn:aws:iam::113645088585:role/techchallenge1-ecs-task-execution-role",
+    "networkMode": "awsvpc",
+    "revision": 12,
+    "volumes": [],
+    "status": "ACTIVE",
+    "requiresAttributes": [
+        {
+            "name": "com.amazonaws.ecs.capability.logging-driver.awslogs"
+        },
+        {
+            "name": "ecs.capability.execution-role-awslogs"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.ecr-auth"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.docker-remote-api.1.19"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.task-iam-role"
+        },
+        {
+            "name": "ecs.capability.execution-role-ecr-pull"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.docker-remote-api.1.18"
+        },
+        {
+            "name": "ecs.capability.task-eni"
+        }
+    ],
+    "placementConstraints": [],
+    "compatibilities": [
+        "EC2",
+        "FARGATE",
+        "MANAGED_INSTANCES"
+    ],
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "cpu": "512",
+    "memory": "1024",
+    "registeredAt": "2026-04-25T04:22:10.232000+00:00",
+    "registeredBy": "arn:aws:sts::113645088585:assumed-role/techchallenge1-jenkins-ec2-role/i-098d9f8f33e681490"
+}
